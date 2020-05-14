@@ -1,1 +1,1 @@
-# Keithley-2230G
+This is a program in Python using VISA from National Instruments to communicate with the Keithley 2230G Multi-Channel Programmable DC Power Supply. Because I do not have the instrument with me, I am unable to test my code properly, so alert me to any issues.
