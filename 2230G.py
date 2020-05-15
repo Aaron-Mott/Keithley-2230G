@@ -15,7 +15,7 @@ class KEI2230G():
     def __innit__(self):
         
         self.rm = visa.ResourceManager()
-        self.inst_address = 'ASRL3::INSTR'
+        #self.inst_address = 
         baud_rate = 9600 #Can be set to 4800, 9600, 19200, 38400, 57600, 115200
         self.inst = self.rm.open_resource(self.instr_address, baud_rate)
         self.inst.term_chars = '/n'
