@@ -34,8 +34,8 @@ class KEI2230G():
         #Read the Standard Event Enable Register.  
     def get_standard_event(self):
         
-        current_register = self.inst.query("*ESE?")
-        return(str(current_register))
+        current_register = str(self.inst.query("*ESE?"))
+        return(current_register)
         
         #Read the Standard Event Status Register and clear it.  
     def get_standard_event_and_clear(self):
@@ -80,7 +80,7 @@ class KEI2230G():
         #or false. 0 is false and 1 is true.
     def set_psc(self, NR1):
         
-        if int(NR1) == 0 or 1:
+        if int(NR1) in range(1):
             self.inst.write("*PSC " + str(NR1))
         else:
             return("Input error. Please input 0 for false or 1 for true.")
@@ -91,7 +91,7 @@ class KEI2230G():
         if type(NR1) is int and int(NR1) in range(1, 37):
             self.inst.write("*RCL " + str(NR1))
         else:
-            return("Input error. Enter an integer between 1 and 36.")
+            return("Input error. Please enter an integer between 1 and 36.")
             
         #Resets the power supply to default settings.  
     def reset_settings(self):
@@ -105,7 +105,7 @@ class KEI2230G():
         if int(NR1) in range(1, 37):
             self.inst.write("*SAV " + str(NR1))
         else:
-            return("Input error. Enter an integer between 1 and 36.")
+            return("Input error. Please enter an integer between 1 and 36.")
         
         #Sets or the bits in the Status Byte Enable Register.  
     def set_status_byte(self, NR1):
@@ -178,6 +178,8 @@ class KEI2230G():
         #Checks if state and password are correct
         if state in range(1) and str(password) == code:
             self.inst.write("CAL:SEC " + str(state) + " " + str(password))
+        else:
+            ("Input error. Please refer to the manual for correct inputs.")
         
         #Enables or disables calibration mode without asking for password.  
     def cal_sec_unsecure(self, state):
@@ -185,12 +187,16 @@ class KEI2230G():
         code = str(self.get_info.split('\n')[1].split(":")[1].replace(" ", ""))
         if state in range(1):
             self.inst.write("CAL:SEC " + str(state) + " " + str(code))
+        else:
+            ("Input error. Please enter 0 or 1.")
             
         #Writes the calibration information of the instrument.  
     def cal_str(self, string):
         
         if len(str(string).encode('utf8')) in range(23):
             self.inst.write("CAL:STR " + str(string))
+        else:
+            return("Input error. Please input a string less than 22 bytes.")
             
         #Queries for calibration information of the intrsument.  
     def get_cal(self):
@@ -204,7 +210,8 @@ class KEI2230G():
         if type(NR2) is int or float:
             self.inst.write("CAL:VOLT " + str(NR2))
         else:
-            return("Input error. Please input a valid input.")
+            return("Input error. Please refer to the manual for correct "
+                   "inputs.")
         
         #Sets the voltage calibration points.  
     def cal_volt_lev(self, point):
@@ -385,7 +392,7 @@ class KEI2230G():
         if str(output).upper() in ["ON", "OFF"]:
             self.inst.write("CHAN:OUTP " + str(output.upper()))
         else:
-            return("Input error: Please input ON or OFF.")
+            return("Input error. Please enter ON or OFF.")
         
         #Returns the output state of the presently selected channel.  
     def get_output(self):
@@ -812,10 +819,10 @@ class KEI2230G():
                             str(NR1))
         else:
             return("Input error. Please enter 1, 2, or 3 for x and an integer"
-                   " between 0 and 65,535 for NR1."))
+                   " between 0 and 65,535 for NR1.")
         
         #Returns the contents of the Questionable Instrument Summary Event
-        #Enable Register of the status model for the specified channel.  
+        #Enable Registser of the status model for the specified channel.  
     def get_qiseer(self, x):
         
         if int(x) in range(1, 4):
