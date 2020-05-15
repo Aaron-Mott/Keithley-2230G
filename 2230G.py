@@ -822,7 +822,7 @@ class KEI2230G():
                    " between 0 and 65,535 for NR1.")
         
         #Returns the contents of the Questionable Instrument Summary Event
-        #Enable Registser of the status model for the specified channel.  
+        #Enable Register of the status model for the specified channel.  
     def get_qiseer(self, x):
         
         if int(x) in range(1, 4):
