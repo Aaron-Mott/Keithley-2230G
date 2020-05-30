@@ -29,7 +29,7 @@ class KEI2230G():
         #Edit the Standard Event Enable Register.  
     def edit_standard_event(self, NRf):
 
-        self.inst.write("*ESE " + str(NRf))
+        self.inst.write(f"*ESE {NRf}")
         
         #Read the Standard Event Enable Register.  
     def get_standard_event(self):
@@ -47,14 +47,13 @@ class KEI2230G():
         #and firmware revision level.  
     def get_info(self):
         
-        info = str(self.inst.query("*IDN?"))
-        info = info.split(',')
+        info = str(self.inst.query("*IDN?")).split(',')
         return(" Manufacturer: " + info[0] + '\n',
               "Model: " + info[1] + '\n',
               "Serial Number: " + info[2]+'\n',
               " Firmware Version: " + info[3])
     
-        #Returns model type (30-3, 30-6, or 60-3)
+        #Returns model type (30-3, 30-6, or 60-3).  
     def get_model(self):
         
         model = (str(self.get_info.split('\n')[1].split(":")
@@ -80,18 +79,20 @@ class KEI2230G():
         #or false. 0 is false and 1 is true.
     def set_psc(self, NR1):
         
-        if int(NR1) in range(1):
-            self.inst.write("*PSC " + str(NR1))
+        if int(NR1) in range(2):
+            self.inst.write(f"*PSC {NR1}")
         else:
-            return("Input error. Please input 0 for false or 1 for true.")
+            raise ValueError("Value Error. Please enter 0 for false or 1 for "
+                             "true.")
         
         #Recalls the setups you saved in the specified memory location.  
     def set_setup(self, NR1):
         
-        if type(NR1) is int and int(NR1) in range(1, 37):
-            self.inst.write("*RCL " + str(NR1))
+        if int(NR1) in range(1, 37):
+            self.inst.write(f"*RCL {NR1}")
         else:
-            return("Input error. Please enter an integer between 1 and 36.")
+            raise ValueError("Value Error. Please enter an integer between 1 "
+                             "and 36.")
             
         #Resets the power supply to default settings.  
     def reset_settings(self):
@@ -103,17 +104,19 @@ class KEI2230G():
     def save_to(self, NR1):
         
         if int(NR1) in range(1, 37):
-            self.inst.write("*SAV " + str(NR1))
+            self.inst.write(f"*SAV {NR1}")
         else:
-            return("Input error. Please enter an integer between 1 and 36.")
+            raise ValueError("Value Error. Please enter an integer between 1 "
+                             "and 36.")
         
         #Sets or the bits in the Status Byte Enable Register.  
     def set_status_byte(self, NR1):
         
         if int(NR1) in range(256):
-            self.inst.write("*SRE " + str(NR1))
+            self.inst.write(f"*SRE {NR1}")
         else:
-            return("Input error. Please enter an integer between 0 and 255.")
+            raise ValueError("Value Error. Please enter an integer between 0 "
+                             "and 255.")
         
         #Queries Status Byte Enable Register.  
     def get_status_byte(self):
@@ -148,17 +151,18 @@ class KEI2230G():
     def cal_curr(self, NR2):
         
         if type(NR2) is float or int:
-            self.inst.write("CAL:CURR " + str(NR2))
+            self.inst.write(f"CAL:CURR {NR2}")
         else:
-            return("Input error. Please enter a valid input.")
+            raise ValueError("Value Error. Please refer to the manual for "
+                             "correct inputs.")
         
         #Sets the current calibration points.  
     def cal_curr_lev(self, point):
         
         if str(point).upper() == 'P1' or 'P2':
-            self.inst.write("CAL:CURR:LEV " + str(point))
+            self.inst.write(f"CAL:CURR:LEV {point}.upper()")
         else:
-            return("Input error. Please enter P1 or P2.")
+            raise ValueError("Value Error. Please enter P1 or P2.")
         
         #Sets the current calibration coefficient as the default value.
     def cal_init(self):
@@ -171,32 +175,34 @@ class KEI2230G():
         self.inst.write("CAL:SAV")
         
         #Enables or disables calibration mode.  
-    def cal_sec(self, state, password):
+    def cal_sec(self, boolean, password):
         
         #Gets serial number
         code = str(self.get_info.split('\n')[1].split(":")[1].replace(" ", ""))
         #Checks if state and password are correct
-        if state in range(1) and str(password) == code:
-            self.inst.write("CAL:SEC " + str(state) + " " + str(password))
+        if boolean in range(2) and str(password) == code:
+            self.inst.write(f"CAL:SEC {boolean} {password}")
         else:
-            ("Input error. Please refer to the manual for correct inputs.")
+            raise ValueError("Value Error. Please refer to the manual for "
+                             "correct inputs.")
         
         #Enables or disables calibration mode without asking for password.  
-    def cal_sec_unsecure(self, state):
+    def cal_sec_unsecure(self, boolean):
         
         code = str(self.get_info.split('\n')[1].split(":")[1].replace(" ", ""))
-        if state in range(1):
-            self.inst.write("CAL:SEC " + str(state) + " " + str(code))
+        if boolean in range(2):
+            self.inst.write(f"CAL:SEC {boolean} {code}")
         else:
-            ("Input error. Please enter 0 or 1.")
+            raise ValueError("Value Error. Please enter 0 or 1.")
             
         #Writes the calibration information of the instrument.  
     def cal_str(self, string):
         
-        if len(str(string).encode('utf8')) in range(23):
-            self.inst.write("CAL:STR " + str(string))
+        if 0 <= len(str(string).encode('utf8')) <= 23:
+            self.inst.write(f"CAL:STR {string}")
         else:
-            return("Input error. Please input a string less than 22 bytes.")
+            raise ValueError("Value Error. Please enter a string less than 22 "
+                             "bytes.")
             
         #Queries for calibration information of the intrsument.  
     def get_cal(self):
@@ -207,19 +213,20 @@ class KEI2230G():
         #Sets the actual output voltage value of the calibration point.  
     def cal_volt(self, NR2):
         
-        if type(NR2) is int or float:
-            self.inst.write("CAL:VOLT " + str(NR2))
+        if (self.get_model() in ['2230G-30-3', '2230G-30-6'] and
+                                0 <= float(NR2) <= 30):
+            self.inst.write(f"CAL:VOLT {NR2}")
         else:
-            return("Input error. Please refer to the manual for correct "
-                   "inputs.")
+            raise ValueError("Value Error. Please refer to the manual for "
+                             "correct inputs.")
         
         #Sets the voltage calibration points.  
     def cal_volt_lev(self, point):
         
         if str(point).upper() in ['P1', 'P2', 'P3', 'P4']:
-            self.inst.write("CAL:VOLT:LEV " + str(point).upper())
+            self.inst.write(f"CAL:VOLT:LEV {point}.upper()")
         else:
-            return("Input error. Please input P1, P2, P3, or P4.")
+            raise ValueError("Value Error. Please enter P1, P2, P3, or P4.")
         
         #Queries the connection state of the channels.  
     def inst_com(self):
@@ -237,9 +244,10 @@ class KEI2230G():
     def set_parallel(self, level):
         
         if str(level).upper() in ["CH1CH2", "CH2CH3", "CH1CH2CH3"]:
-            self.inst.write("INST:COM:PAR " + str(level).upper())
+            self.inst.write(f"INST:COM:PAR {level}.upper()")
         else:
-            return("Input error. Please input CH1CH2, CH2CH3, or CH1CH2CH3.")
+            raise ValueError("Value Error. Please enter CH1CH2, CH2CH3, or "
+                             "CH1CH2CH3.")
         
         #Combines the present voltage readings on channel 1 (CH1) and
         #channel 2 (CH2) when they are connected in series.
@@ -251,23 +259,26 @@ class KEI2230G():
     def set_track(self, level):
         
         if str(level).upper() in ["CH1CH2", "CH2CH3", "CH1CH2CH3"]:
-            self.inst.write("INST:COMB:TRAC " + str(level).upper())
+            self.inst.write(f"INST:COMB:TRAC {level}.upper()")
         else:
-            return("Input error. Please input CH1CH2, CH2CH3, or CH1CH2CH3.")
+            raise ValueError("Value Error. Please enter CH1CH2, CH2CH3, or "
+                             "CH1CH2CH3.")
         
         #Selects channel number.  
     def select_channel(self, NR1):
         
         if int(NR1) in range(1, 4):
-            self.inst.write("INST:NSEL " + str(NR1))
+            self.inst.write(f"INST:NSEL {NR1}")
         else:
-            return("Input error. Please input 1, 2, or 3.")
+            raise ValueError("Value Error. Please enter 1, 2, or 3.")
         
         #Selects the channel.  
     def set_channel(self, level):
         
         if str(level).upper() in ["CH1", "CH2", "CH3"]:
-            self.inst.write("INST " + str(level).upper())
+            self.inst.write(f"INST {level}.upper()")
+        else:
+            raise ValueError("Value Error. Please enter CH1, CH2, or CH3.")
         
         #Queries selected channel.  
     def get_channel(self):
@@ -279,59 +290,65 @@ class KEI2230G():
     def get_channel_curr(self, level):
         
         if str(level).upper() in ["CH1", "CH2", "CH3", "ALL"]:
-            reading = str(self.inst.query("FETC:CURR? " + str(level).upper()))
+            reading = str(self.inst.query(f"FETC:CURR? {level}.upper()"))
             return(reading)
         else:
-            return("Input error. Please input CH1, CH2, CH3, or ALL.")
+            raise ValueError("Value Error. Please enter CH1, CH2, CH3, or ALL"
+                             ".")
         
         #Queries the present power measurement on a specified
         #channel or channels.  
     def get_power(self, level):
         
         if str(level).upper() in ["CH1", "CH2", "CH3", "ALL"]:
-            power = str(self.inst.query("FETC:POW? " + str(level).upper()))
+            power = str(self.inst.query(f"FETC:POW? {level}.upper()"))
             return(power)
         else:
-            return("Input error. Please input CH1, CH2, CH3, or ALL.")
+            raise ValueError("Value error. Please enter CH1, CH2, CH3, or ALL"
+                             ".")
         
         #Queries the new current voltage on a specified channel or channels.
     def get_volt(self, level):
         
         if str(level).upper() in ["CH1", "CH2", "CH3", "ALL"]:
-            volt = str(self.inst.query("FETC:VOLT? " + str(level).upper()))
+            volt = str(self.inst.query(f"FETC:VOLT? {level}.upper()"))
             return(volt)
         else:
-            return("Input error. Please input CH1, CH2, CH3, or ALL.")
+            raise ValueError("Value Error. Please enter CH1, CH2, CH3, or ALL"
+                             ".")
         
         #Initiates and executes a new current measurement or queries the
         #new measured current on a specified channel or channels.
     def meas_curr(self, level): 
         
         if str(level).upper() in ["CH1", "CH2", "CH3", "ALL"]:
-            curr_meas = str(self.inst.query("MEAS:CURR? " + str(level).upper()))
+            curr_meas = str(self.inst.query(f"MEAS:CURR? {level}.upper()"))
             return(curr_meas)
         else:
-            return("Input error. Please input CH1, CH2, CH3, or ALL.")
+            raise ValueError("Value Error. Please enter CH1, CH2, CH3, or ALL"
+                             ".")
     
         #Unitiates and executes a new power measurement or
         #queries the new measured power.  
     def meas_power(self, level):
         
         if str(level).upper() in ["CH1", "CH2", "CH3", "ALL"]:
-            pow_meas = str(self.inst.query("MEAS:POW? " + str(level).upper()))
+            pow_meas = str(self.inst.query(f"MEAS:POW? {level}.upper()"))
             return(pow_meas)
         else:
-            return("Input error. Please input CH1, CH2, CH3, or ALL.")
+            raise ValueError("Value Error. Please enter CH1, CH2, CH3, or ALL"
+                             ".")
         
         #Initiates and executes a new voltage measurement or
         #queries the new measured voltage.  
     def meas_volt(self, level):
         
         if str(level).upper() in ["CH1", "CH2", "CH3", "ALL"]:
-            volt_meas = str(self.inst.query("MEAS:VOLT? " + str(level).upper()))
+            volt_meas = str(self.inst.query(f"MEAS:VOLT? {level}.upper()"))
             return(volt_meas)
         else:
-            return("Input error. Please input CH1, CH2, CH3, or ALL.")
+            raise ValueError("Value Error. Please enter CH1, CH2, CH3, or ALL"
+                             ".")
         
         #Sets voltage and current levels on a specified channel
         #with a single command message.  
@@ -341,58 +358,54 @@ class KEI2230G():
             if str(level.upper()) in ["CH1", "CH2"]:
                 if (str(volt).upper() and str(curr).upper() in 
                     ["MAX", "MIN", "DEF", "UP", "DOWN"] or
-                    float(volt) in range(31) and float(curr) in range(4)):
-                        self.inst.write(("APPL " + str.level.upper() + ", " +
-                                        str(volt.upper()) + ", " + 
-                                        str(curr.upper())))
+                        0 <= float(volt) <= 31 and 0 <= float(curr) <= 4):
+                        self.inst.write((f"APPL {level}.upper(), {volt}.upper,"
+                                         "{curr}.upper()"))
             elif str(level.upper()) == 'CH3':
                 if (str(volt).upper() and str(curr).upper() in 
                     ["MAX", "MIN", "DEF", "UP", "DOWN"] or
-                    float(volt) in range(6) and float(curr) in range(4)):
-                        self.inst.write(("APPL " + str.level.upper() + ", " +
-                                        str(volt.upper()) + ", " + 
-                                        str(curr.upper())))
+                    0 <= float(volt) in 0 <= 5 and 0 <= float(curr) <= 3):
+                        self.inst.write((f"APPL {level}.upper(), {volt}.upper," 
+                                         "{curr}.upper()"))
         if self.get_model == '30-6':
             if str(level.upper()) in ["CH1", "CH2"]:
                 if (str(volt).upper() and str(curr).upper() in 
                     ["MAX", "MIN", "DEF", "UP", "DOWN"] or
-                    float(volt) in range(31) and float(curr) in range(7)):
-                        self.inst.write(("APPL " + str.level.upper() + ", " +
-                                        str(volt.upper()) + ", " + 
-                                        str(curr.upper())))
+                    0 <= float(volt) <= 30 and 0 <= float(curr) <= 6):
+                        self.inst.write((f"APPL {level}.upper(), {volt}.upper," 
+                                         "{curr}.upper()"))
             elif str(level.upper()) == 'CH3':
                 if (str(volt).upper() and str(curr).upper() in 
                     ["MAX", "MIN", "DEF", "UP", "DOWN"] or
-                    float(volt) in range(6) and float(curr) in range(4)):
-                        self.inst.write(("APPL " + str.level.upper() + ", " +
-                                        str(volt.upper()) + ", " + 
-                                        str(curr.upper())))
+                    0 <= float(volt) <= 5 and 0 <= float(curr) <= 3):
+                        self.inst.write((f"APPL {level}.upper(), {volt}.upper," 
+                                         "{curr}.upper()"))
         if self.get_model == '60-3':
             if str(level.upper()) in ["CH1", "CH2"]:
                 if (str(volt).upper() and str(curr).upper() in 
                     ["MAX", "MIN", "DEF", "UP", "DOWN"] or
-                    float(volt) in range(61) and float(curr) in range(4)):
-                        self.inst.write(("APPL " + str.level.upper() + ", " +
-                                        str(volt.upper()) + ", " + 
-                                        str(curr.upper())))
+                    0 <= float(volt) <= 60 and 0 <= float(curr) <= 3):
+                        self.inst.write((f"APPL {level}.upper(), {volt}.upper," 
+                                         "{curr}.upper()"))
             elif str(level.upper()) == 'CH3':
                 if (str(volt).upper() and str(curr).upper() in 
                     ["MAX", "MIN", "DEF", "UP", "DOWN"] or
-                    float(volt) in range(6) and float(curr) in range(4)):
-                        self.inst.write(("APPL " + str.level.upper() + ", " +
-                                        str(volt.upper()) + ", " + 
-                                        str(curr.upper())))
+                    0 <= float(volt) <= 5 and 0 <= float(curr) <= 3):
+                        self.inst.write((f"APPL {level}.upper(), {volt}.upper," 
+                                         "{curr}.upper()"))
         else:
-            return("Input error. Please refer to the manual for correct "
-                   "inputs.")
+            raise ValueError("Value Error. Please refer to the manual for "
+                             "correct inputs.")
         
         #Sets the output state of the presently selected channel.  
-    def set_output(self, output):
+    def set_output(self, boolean):
         
-        if str(output).upper() in ["ON", "OFF"]:
-            self.inst.write("CHAN:OUTP " + str(output.upper()))
+        if str(boolean).upper() in ["ON", "OFF"]:
+            self.inst.write(f"CHAN:OUTP {boolean}.upper()")
+        if int(boolean) in range(2):
+            self.inst.write(f"CHAN:OUTP {boolean}.upper()")
         else:
-            return("Input error. Please enter ON or OFF.")
+            raise ValueError("Value Error. Please enter ON, OFF, 0, or 1.")
         
         #Returns the output state of the presently selected channel.  
     def get_output(self):
@@ -427,21 +440,21 @@ class KEI2230G():
     def set_curr(self, curr):
         
         if self.get_model == '30-3':
-                if float(curr) in range(4):
-                    self.inst.write("CURR " + str(curr))
+                if 0 <= float(curr) <= 3:
+                    self.inst.write(f"CURR {curr}")
         if self.get_model == '30-6':
             if self.get_channel in ['CH1', 'CH2']:
-                if float(curr) in range(7):
-                    self.inst.write("CURR " + str(curr))
+                if 0 <= float(curr) <= 6:
+                    self.inst.write(f"CURR {curr}")
             elif self.get_channel == 'CH3':
-                if float(curr) in range(4):
-                    self.inst.write("CURR " + str(curr))
+                if 0 <= float(curr) <= 4:
+                    self.inst.write(f"CURR {curr}")
         if self.get_model == '60-3':
-            if float(curr) in range(4):
-                self.inst.write("CURR " + str(curr))
+            if 0 <= float(curr) <= 3:
+                self.inst.write(f"CURR {curr}")
         else:
-            return("Input error. Please refer to the manual for correct "
-                   "inputs.")
+            raise ValueError("Value Error. Please refer to the manual for "
+                             "correct inputs.")
         
         #Returns the current value of the power supply.  
     def get_curr(self):
@@ -450,20 +463,23 @@ class KEI2230G():
         return(curr)
         
         #Sets the output state of the power supply.      
-    def set_output_state(self, state):
+    def set_output_state(self, boolean):
         
-        if str(state).upper() in ['ON', 'OFF', '0', '1']:
-            self.inst.write("OUTP:ENAB " + str(state).upper())
+        if str(boolean).upper() in ['ON', 'OFF']:
+            self.inst.write(f"OUTP:ENAB {boolean}.upper()")
+        if int(boolean) in range(2):
+            self.inst.write(f"OUTP:ENAB {boolean}")
         else:
-            return("Input error. Please input ON, OFF, 0, or 1.")
+            raise ValueError("Value Error. Please enter ON, OFF, 0, or 1.")
         
         #Sets the parallel synchronization state of the three channels.  
     def set_output_parrallel(self, channels):
         
         if str(channels).upper() in ['CH1CH2', 'CH2CH3', 'CH1CH2CH3']:
-            self.inst.write("OUTP: PAR " + str(channels).upper())
+            self.inst.write(f"OUTP: PAR {channels}.upper()")
         else:
-            return("Input error. Please input CH1CH2, CH2CH3, or CH1CH2CH3.")
+            raise ValueError("Value Error. Please enter CH1CH2, CH2CH3, or "
+                             "CH1CH2CH3.")
         
         #Returns the parallel synchronization state of the three channels.  
     def get_output_parrallel(self):
@@ -480,12 +496,14 @@ class KEI2230G():
         #and channel 2 (CH2). If channel 3 (CH3) and CH1 or CH3 and CH2 are
         #in parallel synchronization states, an error is generated after
         #the command is executed.  
-    def set_output_series(self, state):
+    def set_output_series(self, boolean):
         
-        if str(state).upper() in ['ON', 'OFF', '0', '1']:
-            self.inst.write("OUTP:SER " + str(state).upper())
+        if str(boolean).upper() in ['ON', 'OFF']:
+            self.inst.write(f"OUTP:SER {boolean}.upper()")
+        if int(boolean) in range(2):
+            self.inst.write(f"OUTP:SER {boolean}")
         else:
-            return("Input error. Please input ON, OFF, 0, or 1.")
+            raise ValueError("Value Error. Please enter ON, OFF, 0, or 1.")
         
         #Returns the synchronization state of CH1 and CH2.  
     def get_output_series(self):
@@ -494,12 +512,14 @@ class KEI2230G():
         return(output_series)
     
         #Sets the output state of all three channels. 
-    def set_output_states(self, state):
+    def set_output_states(self, boolean):
         
-        if str(state).upper() in ['ON', 'OFF', '0', '1']:
-            self.inst.write("OUTP " + str(state).upper())
+        if str(boolean).upper() in ['ON', 'OFF']:
+            self.inst.write(f"OUTP {boolean}.upper()")
+        if int(boolean) in range(2):
+            self.inst.write(f"OUTP {boolean}")
         else:
-            return("Input error. Please input ON, OFF, 0, or 1.")
+            raise ValueError("Value Error. Please enter ON, OFF, 0, or 1.")
         
         #Returns the output state of all three channels.  
     def get_output_states(self):
@@ -510,11 +530,11 @@ class KEI2230G():
         #Sets the delay time for the output timer function.  
     def set_time_delay(self, NR2):
         
-        if float(NR2) in numpy.linspace(0.1, 99999.9):
-            self.inst.write("OUTP:TIM:DEL " + str(NR2))
+        if 0.1 <= float(NR2) <= 99999.9:
+            self.inst.write(f"OUTP:TIM:DEL {NR2}")
         else:
-            return("Input error. Please input a value between 0.1 and"
-                   "99999.9.")
+            raise ValueError("Value Error. Please enter a value between 0.1 "
+                             "and 99999.9.")
         
         #Returns the delay time for the output timer function.
     def get_time_delay(self):
@@ -523,12 +543,14 @@ class KEI2230G():
         return(time_delay)
     
         #Sets the output timer state for the presently selected channel.  
-    def set_time_delay_channel(self, state):
+    def set_time_delay_channel(self, boolean):
         
-        if str(state).upper() in ['ON', 'OFF', '0', '1']:
-            self.inst.write("OUTP:TIM " + str(state).upper())
+        if str(boolean).upper() in ['ON', 'OFF']:
+            self.inst.write(f"OUTP:TIM {boolean}.upper()")
+        if int(boolean) in range(2):
+            self.inst.write(f"OUTP:TIM {boolean}")
         else:
-            return("Input error. Please input ON, OFF, 0, or 1.")
+            raise ValueError("Value Error. Please enter ON, OFF, 0, or 1.")
         
         #Returns output timer state for presently selected channel.  
     def get_time_delay_channel(self):
@@ -537,9 +559,13 @@ class KEI2230G():
         return(time_delay_channel)
     
         #Sets the value of the voltage step.   
-    def set_volt_step(self, NR2):
+    def set_volt_step(self, NR2, unit = 'V'):
         
-        self.inst.write("VOLT:STEP " + str(NR2))
+        if str(unit).upper() == 'MV':
+            NR2 = NR2 / 1000
+        if str(unit).upper() == 'KV':
+            NR2 = NR2 * 1000
+        self.inst.write(f"VOLT:STEP {NR2}")
         
         #Returns value of the voltage step.  
     def get_volt_step(self):
@@ -564,28 +590,28 @@ class KEI2230G():
     
         if self.get_model == '30-3':
             if self.get_channel in ['CH1', 'CH2']:
-                if float(NRf) in range(31):
-                    self.inst.write("VOLT " + str(NRf))
+                if 0 <= float(NRf) <= 30:
+                    self.inst.write(f"VOLT {NRf}")
             elif self.get_channel == 'CH3':
-                if float(NRf) in range(6):
-                    self.inst.write("VOLT " + str(NRf))
+                if 0 <= float(NRf) <= 5:
+                    self.inst.write(f"VOLT {NRf}")
         if self.get_model == '30-6':
             if self.get_channel in ['CH1', 'CH2']:
-                if float(NRf) in range(31):
-                    self.inst.write("VOLT " + str(NRf))
+                if 0 <= float(NRf) <= 30:
+                    self.inst.write(f"VOLT {NRf}")
             elif self.get_channel == 'CH3':
-                if float(NRf) in range(6):
-                    self.inst.write("VOLT " + str(NRf))
+                if 0 <= float(NRf) <= 5:
+                    self.inst.write(f"VOLT {NRf}")
         if self.get_model == '60-3':
             if self.get_channel in ['CH1', 'CH2']:
-                if float(NRf) in range(61):
-                    self.inst.write("VOLT " + str(NRf))
+                if 0 <= float(NRf) <= 60:
+                    self.inst.write(f"VOLT {NRf}")
             elif self.get_channel == 'CH3':
-                if float(NRf) in range(6):
-                    self.inst.write("VOLT " + str(NRf))         
+                if 0 <= float(NRf) <= 5:
+                    self.inst.write(f"VOLT {NRf}")       
         else:
-            return("Input error. Please refer to the manual for correct "
-                   "inputs.")
+            raise ValueError("Value Error. Please refer to the manual for "
+                             "correct inputs.")
         
         #Returns the voltage value of the power supply.
     def get_volt_power(self):
@@ -598,28 +624,28 @@ class KEI2230G():
         
         if self.get_model == '30-3':
             if self.get_channel in ['CH1', 'CH2']:
-                if float(NRf) in range(31):
-                    self.inst.write("VOLT:LIM " + str(NRf))
+                if 0 <= float(NRf) <= 30:
+                    self.inst.write(f"VOLT:LIM {NRf}")
             elif self.get_channel == 'CH3':
-                if float(NRf) in range(6):
-                    self.inst.write("VOLT:LIM " + str(NRf))
+                if 0 <= float(NRf) <= 5:
+                    self.inst.write(f"VOLT:LIM {NRf}")
         if self.get_model == '30-6':
             if self.get_channel in ['CH1', 'CH2']:
-                if float(NRf) in range(31):
-                    self.inst.write("VOLT:LIM " + str(NRf))
+                if 0<= float(NRf) <= 30:
+                    self.inst.write(f"VOLT:LIM {NRf}")
             elif self.get_channel == 'CH3':
-                if float(NRf) in range(6):
-                    self.inst.write("VOLT:LIM " + str(NRf))
+                if 0 <= float(NRf) <= 5:
+                    self.inst.write(f"VOLT:LIM {NRf}")
         if self.get_model == '60-3':
             if self.get_channel in ['CH1', 'CH2']:
-                if float(NRf) in range(61):
-                    self.inst.write("VOLT:LIM " + str(NRf))
+                if 0 <= float(NRf) <= 60:
+                    self.inst.write(f"VOLT:LIM {NRf}")
             elif self.get_channel == 'CH3':
-                if float(NRf) in range(6):
-                    self.inst.write("VOLT:LIM " + str(NRf))         
+                if 0 <= float(NRf) <= 5:
+                    self.inst.write(f"VOLT:LIM {NRf}")   
         else:
-            return("Input error. Please refer to the manual for correct "
-                   "inputs.")
+            raise ValueError("Value Error. Please refer to the manual for "
+                             "correct inputs.")
         
         #Returns the voltage limit for the present channel.  
     def get_volt_limit(self):
@@ -628,12 +654,14 @@ class KEI2230G():
         return(volt_limit)
     
         #Enables or disables the voltage limit function.  
-    def volt_limit_stat(self, state):
+    def volt_limit_stat(self, boolean):
         
-        if str(state).upper() in ['0', '1', 'ON', 'OFF']:
-            self.inst.write("VOLT:LIM:STAT " + str(state).upper())
+        if str(boolean).upper() in ['ON', 'OFF']:
+            self.inst.write(f"VOLT:LIM:STAT {boolean}.upper()")
+        if int(boolean) in range(2):
+            self.inst.write(f"VOLT:LIM:STAT {boolean}")
         else:
-            return("Input error. Please input 0, 1, ON, or OFF.")
+            raise ValueError("Value Error. Please enter 0, 1, ON, or OFF.")
         
         #Returns status of the voltage limit functions.  
     def get_limit_stat(self):
@@ -651,9 +679,10 @@ class KEI2230G():
     def set_oeer(self, NR1):
         
         if int(NR1) in range(256):
-            self.inst.write("STAT:OPER:ENAB " + str(NR1))
+            self.inst.write(f"STAT:OPER:ENAB {NR1}")
         else:
-            return("Input error. Please enter an integer between 0 and 255.")
+            raise ValueError("Value Error. Please enter an integer between 0 "
+                             "and 255.")
      
         #Returns the Operation Event Enable Register of the status model.  
     def get_oeer(self):
@@ -672,9 +701,10 @@ class KEI2230G():
     def set_enab(self, NR1):
         
         if int(NR1) in range(256):
-            self.inst.write("STAT:OPER:INST:ENAB " +str(NR1))
+            self.inst.write(f"STAT:OPER:INST:ENAB {NR1}")
         else:
-            return("Input error. Please enter an integer between 0 and 255.")
+            raise ValueError("Value Error. Please enter an integer between 0 "
+                             "and 255.")
         
         #Returns the Operation Enable Register of the status mode.
     def get_enab(self):
@@ -695,44 +725,40 @@ class KEI2230G():
     def get_oiscr(self, x):
         
         if int(x) in range(1, 4):
-            oiscr = str(self.inst.query("STAT:OPER:INST:ISUM" + str(x) +
-                                        ":COND?"))
+            oiscr = str(self.inst.query(f"STAT:OPER:INST:ISUM{x}:COND?"))
             return(oiscr)
         else:
-            return("Input error. Please input 1, 2, or 3.")
+            raise ValueError("Value Error. Please enter 1, 2, or 3.")
         
         #Sets the Operation Instrument Summary Enable Register of the status
         #model for the specified channel.  
     def set_oiser(self, x, NR1):
         
         if int(x) in range(1, 3) and int(NR1) in range(256):
-            self.inst.write("STAR:OPER:INST:ISUM" + str(x) + ":ENAB " + 
-                            str(NR1))
+            self.inst.write(f"STAR:OPER:INST:ISUM{x}:ENAB {NR1}")
         else:
-            return("Input error. Please enter 1, 2, or 3 for x and an"
-                   "integer between 0 and 255 for NR1.")
+            raise ValueError("Value Error. Please enter 1, 2, or 3 for x and "
+                             "an integer between 0 and 255 for NR1.")
         
         #Returns the Operation Instrument Summary Enable Register of the status
         #model for the specified channel.  
     def get_oister(self, x):
         
         if int(x) in range(1, 4):
-            oiser = str(self.inst.query("STAT:OPER:INST:ISUM " + str(x) + 
-                                        "ENAB?"))
+            oiser = str(self.inst.query(f"STAT:OPER:INST:ISUM{x}:ENAB?"))
             return(oiser)
         else:
-            return("Input error. Please enter 1, 2, or 3.")
+            raise ValueError("Value Error. Please enter 1, 2, or 3.")
         
         #Returns the Operation Instrument Summary Event Register of the
         #status model for the specified channel.  
     def get_inst_event(self, x):
         
         if int(x) in range(1, 4):
-            inst_event = str(self.inst.query("STAT:OPER:INST:ISUM" + str(x)+
-                                             "?"))
+            inst_event = str(self.inst.query(f"STAT:OPER:INST:ISUM{x}?"))
             return(inst_event)
         else:
-            return("Input error. Please enter 1, 2, or 3.")
+            raise ValueError("Value Error. Please enter 1, 2, or 3.")
         
         #Resets all bits in the status model.  
     def reset_status(self):
@@ -755,9 +781,10 @@ class KEI2230G():
     def set_qenr(self, NR1):
         
         if int(NR1) in range(256):
-            self.inst.write("STAT:QUES:ENAB " + str(NR1))
+            self.inst.write(f"STAT:QUES:ENAB {NR1}")
         else:
-            return("Input error. Please enter an integer between 0 and 255.")
+            raise ValueError("Value Error. Please enter an integer between 0 "
+                             "and 255.")
         
         #Returns the Questionable Event Enable Register (QENR) of the
         #status model. The QENR is an eight-bit mask register that determines
@@ -780,10 +807,10 @@ class KEI2230G():
     def set_qier(self, NR1):
         
         if int(NR1) in range(65536):
-            self.inst.write("STAT:QUES:INST:ENAB " + str(NR1))
+            self.inst.write(f"STAT:QUES:INST:ENAB {NR1}")
         else:
-            return("Input error. Please enter an integer between 0 and "
-                   "65,536.")
+            raise ValueError("Value Error. Please enter an integer between 0 "
+                             "and 65,536.")
         
         #Returns the Questionable Instrument Enable Register of the status 
         #model.  
@@ -804,44 +831,40 @@ class KEI2230G():
     def get_qier_channel(self, x):
         
         if x in range(1, 4):
-            qier_channel = self.inst.query("STAT:QUES:INST:ISUM " + str(x) + 
-                                           ":COND?")
+            qier_channel = self.inst.query(f"STAT:QUES:INST:ISUM{x}:COND?")
             return(qier_channel)
         else:
-            return("Input error. Please enter 1, 2, or 3.")
+            raise ValueError("Value Error. Please enter 1, 2, or 3.")
         
         #Sets the contents of the Questionable Instrument Summary Event
         #Enable Register of the status model for the specified channel.  
     def set_qiseer(self, x, NR1):
         
         if int(x) in range(1, 4) and int(NR1) in range(65536):
-            self.inst.write("STAT:QUES:INST:ISUM" + str(x) + ":ENAB " + 
-                            str(NR1))
+            self.inst.write(f"STAT:QUES:INST:ISUM{x}:ENAB {NR1}")
         else:
-            return("Input error. Please enter 1, 2, or 3 for x and an integer"
-                   " between 0 and 65,535 for NR1.")
+            raise ValueError("Value Error. Please enter 1, 2, or 3 for x and "
+                             "an integer between 0 and 65,535 for NR1.")
         
         #Returns the contents of the Questionable Instrument Summary Event
         #Enable Register of the status model for the specified channel.  
     def get_qiseer(self, x):
         
         if int(x) in range(1, 4):
-            qiseer = str(self.inst.query("STAT:QUES:INST:ISUM" + str(x) +
-                                         ":ENAB?"))
+            qiseer = str(self.inst.query(f"STAT:QUES:INST:ISUM{x}:ENAB?"))
             return(qiseer)
         else:
-            return("Input error. Please enter 1, 2, or 3.")
+            raise ValueError("Value Error. Please enter 1, 2, or 3.")
         
         #Returns the Operation Instrument Summary Event Register of the status
         #model for the specified channel.  
     def get_oiser_channel(self, x):
         
         if int(x) in range(1, 4):
-            oiser_channel = str(self.inst.query("STAT:QUES:INST:ISUM" + 
-                                                str(x)))
+            oiser_channel = str(self.inst.query(f"STAT:QUES:INST:ISUM{x}"))
             return(oiser_channel)
         else:
-            return("Input error. Please enter 1, 2, or 3.")
+            raise ValueError("Value Error. Please enter 1, 2, or 3.")
         
         #Tests the beeper function of the power supply.
         #If it passes the test, a beep is issued.  
