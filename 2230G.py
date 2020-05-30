@@ -8,7 +8,6 @@ aaron.b.mott@gmail.com
 
 
 import visa
-import numpy
 
 class KEI2230G():
     
