@@ -11,7 +11,11 @@ import visa
 
 class KEI2230G():
     
-    def __innit__(self, inst_address, baud_rate = 9600):
+    def __innit__(self,
+                  inst_address,
+                  baud_rate = 9600,
+                  term_chars = '\n',
+                  timeout = 2000):
         """
         Initializes the instrument with instrument address, baud rate,
         termination characters, and timeout.
@@ -23,13 +27,17 @@ class KEI2230G():
         baud_rate : int, optional
              The default is 9600, but may be set to 4800, 9600, 19200, 38400,
                                                     57600, or 115200.
+        term_chars : str, optional
+            The termination character for the instrument.
+        timeout : int, float
+            Amount of time to wait for a response before a timeout error in
+            milliseconds.
         """
-        
         self.rm = visa.ResourceManager()
         self.inst = self.rm.open_resource(self.instr_address,
                                           baud_rate,
-                                          term_chars = '\n',
-                                          timeout = None)
+                                          term_chars,
+                                          timeout)
         
     def clear_status(self):
         """Clears all the event registers and error queue."""
@@ -506,7 +514,7 @@ class KEI2230G():
 
         Parameters
         ----------
-        level : int
+        level : str, int
             The channel or channels on which to make a new power measurement.
         """
         if str(level).upper() in ["CH1", "CH2", "CH3", "ALL"]:
@@ -529,7 +537,7 @@ class KEI2230G():
 
         Parameters
         ----------
-        level : int, str
+        level : str, int
             The channel or channels on which to make a new voltage measurement.
         """
         if str(level).upper() in ["CH1", "CH2", "CH3", "ALL"]:
@@ -552,11 +560,11 @@ class KEI2230G():
 
         Parameters
         ----------
-        level : int, str
+        level : str, int
             The channel to apply the settings to.
-        volt : int, str
+        volt : str, int
             The voltage value to apply.
-        curr : int, str
+        curr : str, int
             The current value to apply.
         """
         if self.get_model == '30-3':
@@ -667,7 +675,7 @@ class KEI2230G():
         ----------
         step : float
             The amount to increase the current.
-        unit : str
+        unit : str, optional
             Unit of measure for the specified current value.
         """
         if str(unit).upper() == 'MA':
@@ -699,9 +707,9 @@ class KEI2230G():
 
         Parameters
         ----------
-        curr : int, str
+        curr : str, int
             The current value.
-        unit : str
+        unit : str, optional
             Unit of measure (amperes).
         """
         if str(unit).upper() == 'MA':
@@ -754,7 +762,7 @@ class KEI2230G():
 
         Parameters
         ----------
-        channels : int, str
+        channels : str, int
             The channel that the parallel synchronization state is applied to.
         """
         if str(channels).upper() in ['CH1CH2', 'CH2CH3', 'CH1CH2CH3']:
@@ -786,7 +794,7 @@ class KEI2230G():
 
         Parameters
         ----------
-        boolean : int, str
+        boolean : str, int
             The series synchronization state.
         """
         if str(boolean).upper() in ['ON', 'OFF']:
@@ -807,7 +815,7 @@ class KEI2230G():
 
         Parameters
         ----------
-        boolean : int, str
+        boolean : str, int
             The output state.
         """
         if str(boolean).upper() in ['ON', 'OFF']:
