@@ -225,7 +225,7 @@ class KEI2230G():
         point : str
             Points P1 and P2 must be calibrated in numeric order..
         """
-        if str(point).upper() == 'P1' or 'P2':
+        if str(point).upper() in ['P1', 'P2']:
             self.inst.write(f"CAL:CURR:LEV {point}.upper()")
         else:
             raise ValueError("Value Error. Please enter P1 or P2.")
@@ -378,7 +378,6 @@ class KEI2230G():
         ----------
         level : str
             The channels to be set to tracking mode.
-
         """
         if str(level).upper() in ['CH1CH2', 'CH2CH3', 'CH1CH2CH3']:
             self.inst.write(f"INST:COMB:TRAC {level}.upper()")
@@ -399,7 +398,6 @@ class KEI2230G():
         ----------
         NR1 : int
             The channel number.
-
         """
         if int(NR1) in range(1, 4):
             self.inst.write(f"INST:NSEL {NR1}")
@@ -678,8 +676,8 @@ class KEI2230G():
         unit : str, optional
             Unit of measure for the specified current value.
         """
-        if str(unit).upper() == 'MA':
-            step = step / 1000
+        if str(unit).upper() == 'MA' and float(step):
+            step = float(step) / 1000
         self.inst.write(f"CURR:STEP {step}A")
         
     def get_curr_step(self):
@@ -712,8 +710,8 @@ class KEI2230G():
         unit : str, optional
             Unit of measure (amperes).
         """
-        if str(unit).upper() == 'MA':
-            NRf = NRf / 1000
+        if str(unit).upper() == 'MA' and float(NRf):
+            NRf = float(NRf) / 1000
         if self.get_model == '30-3':
                 if str(NRf).upper in ['MIN TO MAX', 'MIN', 'MAX', 'UP',
                                        'DOWN', 'DEF'] or 0 <= float(NRf) <= 3:
@@ -841,8 +839,8 @@ class KEI2230G():
         unit : str, optional
             Unit of measure for the delay time.
         """
-        if str(unit).upper() == 'MS':
-            NR2 = NR2 / 1000
+        if str(unit).upper() == 'MS' and float(NR2):
+            NR2 = float(NR2) / 1000
         if 0.1 <= float(NR2) <= 99999.9:
             self.inst.write(f"OUTP:TIM:DEL {NR2}")
         else:
@@ -886,10 +884,10 @@ class KEI2230G():
         unit : str, optional
             Unit of measure for the voltage step.
         """
-        if str(unit).upper() == 'MV':
-            NR2 = NR2 / 1000
-        if str(unit).upper() == 'KV':
-            NR2 = NR2 * 1000
+        if str(unit).upper() == 'MV' and float(NR2):
+            NR2 = float(NR2) / 1000
+        if str(unit).upper() == 'KV' and float(NR2):
+            NR2 = float(NR2) * 1000
         self.inst.write(f"VOLT:STEP {NR2}")
         
     def get_volt_step(self):
