@@ -11,7 +11,7 @@ import visa
 
 class KEI2230G():
     
-    def __innit__(self,
+    def __init__(self,
                   inst_address,
                   baud_rate = 9600,
                   term_chars = '\n',
